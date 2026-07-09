@@ -1,5 +1,11 @@
-.PHONY: setup up build deploy demo status logs ai-logs ai-assistant ai-incident \
+.PHONY: help setup up build deploy demo status logs ai-logs ai-assistant ai-incident \
         chaos load rollback reset-app monitoring down clean
+
+.DEFAULT_GOAL := help
+
+help:              ## Show this list (also runs if you just type `make`)
+	@grep -E '^[a-zA-Z_-]+:.*## .*$$' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
 setup:            ## Install docker/kubectl/kind/helm/argo/ollama/k6 on this machine
 	./setup.sh
