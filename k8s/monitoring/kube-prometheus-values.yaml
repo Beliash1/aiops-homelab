@@ -1,0 +1,28 @@
+# Minimal-footprint values for the kube-prometheus-stack Helm chart --
+# trimmed down because this is running on a laptop, not a cluster with
+# dedicated ops nodes. Installed by `make monitoring` (optional, not
+# required for the core self-healing/rollback/autoscaling demos, but the
+# AI log analyzer can pull richer data from here if it's running).
+grafana:
+  enabled: true
+  adminPassword: admin
+  service:
+    type: NodePort
+    nodePort: 30300
+
+prometheus:
+  prometheusSpec:
+    retention: 6h
+    resources:
+      requests: { cpu: 100m, memory: 256Mi }
+      limits: { cpu: 500m, memory: 512Mi }
+    serviceMonitorSelectorNilUsesHelmValues: false
+
+alertmanager:
+  enabled: false
+
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true

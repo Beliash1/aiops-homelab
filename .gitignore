@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+incident-*.md
+*.log
+.DS_Store

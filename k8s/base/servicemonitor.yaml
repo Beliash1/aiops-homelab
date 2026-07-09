@@ -1,0 +1,17 @@
+# Only takes effect if kube-prometheus-stack is installed (make monitoring).
+# Lets Prometheus scrape the app's own lightweight status endpoint.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: aiops-app
+  namespace: aiops-homelab
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: aiops-app
+  endpoints:
+    - port: http
+      path: /metrics-lite
+      interval: 15s

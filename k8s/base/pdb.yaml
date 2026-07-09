@@ -1,0 +1,13 @@
+# Prevents voluntary disruptions (node drains, cluster upgrades) from taking
+# down every replica at once -- pairs with the HPA/self-healing story: the
+# app should survive both "stuff crashes" and "stuff gets rescheduled."
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aiops-app
+  namespace: aiops-homelab
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: aiops-app

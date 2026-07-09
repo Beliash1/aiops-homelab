@@ -1,0 +1,72 @@
+# Argo Rollouts replaces a plain Deployment here. The whole point: a normal
+# Deployment gives you no automated judgment about whether a new version is
+# actually healthy -- you find out from users. A Rollout runs a canary,
+# measures it against the AnalysisTemplate below, and undoes itself
+# automatically if the new version fails, before it ever gets full traffic.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: aiops-app
+  namespace: aiops-homelab
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: aiops-app
+  template:
+    metadata:
+      labels:
+        app: aiops-app
+    spec:
+      containers:
+        - name: aiops-app
+          # CI overwrites this tag via `kustomize edit set image` -- see
+          # .github/workflows/ci.yml. Kept as :dev here so `make deploy`
+          # works out of the box before you've wired up a registry.
+          image: aiops-app:dev
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: APP_VERSION
+              value: "dev"
+            - name: FAIL_MODE
+              value: "none"
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          # Liveness probe = self-healing. If this fails repeatedly, the
+          # kubelet kills and restarts the container -- no human involved.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
+          # Readiness probe = traffic safety. If this fails, the pod is
+          # pulled out of the Service's endpoints but left running, which is
+          # what you want when a pod is merely overloaded, not broken.
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 2
+            periodSeconds: 3
+            failureThreshold: 2
+  strategy:
+    canary:
+      steps:
+        - setWeight: 25
+        - pause: { duration: 20s }
+        - analysis:
+            templates:
+              - templateName: aiops-app-health-check
+        - setWeight: 50
+        - pause: { duration: 20s }
+        - setWeight: 100

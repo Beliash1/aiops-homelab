@@ -1,0 +1,33 @@
+# Pull-based CD. This is what makes "push code, one command, everything
+# happens" actually work for a cluster that lives on your laptop: GitHub
+# Actions (cloud) can build and push an image, but it cannot reach into a
+# kind cluster on your machine. So instead of push-deploying, Argo CD runs
+# INSIDE the cluster and polls the repo -- it reaches out to GitHub, GitHub
+# never has to reach in. CI updates k8s/base/kustomization.yaml's image tag
+# and commits; Argo CD notices the diff within ~3 minutes (or instantly if
+# you run `argocd app sync`) and rolls it out via the Rollout above.
+#
+# Apply after Argo CD is installed:
+#   kubectl apply -f k8s/gitops/argocd-app.yaml
+#
+# Before applying, edit `repoURL` below to point at YOUR fork.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aiops-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YOUR_GITHUB_USERNAME/aiops-homelab.git
+    targetRevision: main
+    path: k8s/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: aiops-homelab
+  syncPolicy:
+    automated:
+      prune: true      # remove resources deleted from git
+      selfHeal: true    # if someone kubectl-edits the cluster by hand, revert to what git says
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,16 @@
+# Local 3-node cluster (1 control-plane + 2 workers) so the HPA and
+# self-healing demos have somewhere to actually spread/reschedule pods.
+# A single-node kind cluster would technically "work" but you'd never see
+# scheduling behavior, which defeats the point of the demo.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: aiops-homelab
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # expose the app's NodePort on localhost so you can curl it directly
+      - containerPort: 30080
+        hostPort: 8081
+        protocol: TCP
+  - role: worker
+  - role: worker

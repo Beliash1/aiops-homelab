@@ -1,0 +1,24 @@
+# What the canary is graded against. If the success-condition fails for
+# `failureLimit` consecutive checks, Argo Rollouts aborts the rollout and
+# scales the canary back to zero automatically -- this IS the auto-rollback,
+# not a separate script watching for failures after the fact.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: aiops-app-health-check
+  namespace: aiops-homelab
+spec:
+  args:
+    - name: service-name
+      value: aiops-app-canary
+  metrics:
+    - name: readyz-success-rate
+      interval: 5s
+      count: 4
+      successCondition: result == 'ready'
+      failureLimit: 2
+      provider:
+        web:
+          url: "http://{{args.service-name}}.aiops-homelab.svc.cluster.local:8000/readyz"
+          timeoutSeconds: 3
+          jsonPath: "{$.status}"

@@ -1,0 +1,5 @@
+# Intentionally minimal: everything in ai/ uses only the Python standard
+# library (urllib, subprocess, json) so there's nothing extra to install or
+# version-pin beyond Python 3.10+. This file exists as a documented place
+# to add packages if you extend the tooling (e.g. `anthropic` or `ollama`
+# official SDKs, `rich` for nicer terminal output).

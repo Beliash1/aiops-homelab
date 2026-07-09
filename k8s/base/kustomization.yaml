@@ -1,0 +1,17 @@
+# CI mutates the image tag here via `kustomize edit set image` -- that
+# mutation, committed back to the repo, is what Argo CD picks up and syncs.
+# This one file is the hinge the whole GitOps loop turns on.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: aiops-homelab
+resources:
+  - namespace.yaml
+  - rollout.yaml
+  - analysistemplate.yaml
+  - service.yaml
+  - hpa.yaml
+  - pdb.yaml
+images:
+  - name: aiops-app
+    newName: aiops-app
+    newTag: dev
