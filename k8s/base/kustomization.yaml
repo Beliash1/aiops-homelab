@@ -5,13 +5,13 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: aiops-homelab
 resources:
-  - namespace.yaml
-  - rollout.yaml
-  - analysistemplate.yaml
-  - service.yaml
-  - hpa.yaml
-  - pdb.yaml
+- namespace.yaml
+- rollout.yaml
+- analysistemplate.yaml
+- service.yaml
+- hpa.yaml
+- pdb.yaml
 images:
-  - name: aiops-app
-    newName: aiops-app
-    newTag: dev
+- name: aiops-app
+  newName: ghcr.io/beliash1/aiops-homelab/aiops-app
+  newTag: sha-81bdc0e
