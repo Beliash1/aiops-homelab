@@ -19,7 +19,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/YOUR_GITHUB_USERNAME/aiops-homelab.git
+    repoURL: https://github.com/Beliash1/aiops-homelab.git
     targetRevision: main
     path: k8s/base
   destination:
